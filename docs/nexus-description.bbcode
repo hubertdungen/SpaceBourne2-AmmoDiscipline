@@ -1,0 +1,151 @@
+[size=6][b]Ammo Discipline: realistic ammo limits and scavenging for SpaceBourne 2[/b][/size]
+
+You carry a few magazines, not a thousand rounds. A dead enemy gives you what was left in their magazine, or nothing. Crates give a handful, and a magazine you drop during a reload is gone. Every magazine counts, and the weapon you bring matters.
+
+An idea by TheCalcMan (Steam).
+
+Version 0.1.0 · UE4SS Lua mod · [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline]GitHub[/url] · works alone or with [url=https://github.com/hubertdungen/SpaceBourne2-HardcoreTacticalRealism]Hardcore Tactical Realism[/url] and the rest of the realism set.
+
+[line]
+[size=5][b]What it does[/b][/size]
+
+[list]
+[*][b]Carry limits per ammo type.[/b] These are the spare rounds you carry, with the game's own limit in brackets:
+[/list]
+
+| Ammo | Limit | Game's limit | |---|---|---| | rifle and SMG rounds or cells | 240 | 999 | | sniper and hunter rounds | 40 | 99 | | laser sniper and hunter cells | 60 | 125 | | shotgun shells | 32 | 299 | | laser shotgun cells | 48 | 99 | | pistol rounds or cells | 60 | 999 / 299 |
+
+Rifle magazines hold 50 to 100 rounds, so 240 rounds is a few magazines, plus the one in your gun. Once you reach a limit, pickups of that type stop, with "Pouch full" on the HUD. On an old save with hundreds of rounds, the excess is left behind once, and the HUD says so.
+[list]
+[*][b]Dead enemies give what they carried.[/b] The game gives 40 to 100 rounds of a random type from 70 % of the dead. With Ammo Discipline you get:
+    - the rounds left in the enemy's magazine;
+    - sometimes a spare magazine (bosses always have one);
+    - sometimes nothing usable;
+    - heavy rounds from a sniper, rifle rounds from everyone else;
+    - nothing from melee fighters and robots.
+[*][b]Crates and loot give less.[/b] An ammo crate gives 30 rounds of each type instead of 100. Ammo lying around gives half. Shops and rewards are never reduced (you paid), but they stop at the limit.
+[*][b]Reloading drops the magazine.[/b] The rounds left in it are lost, and the new magazine comes from your pouch. Reload when you're nearly empty, not after every burst.
+[*][b]Your pistol needs ammo too.[/b] The game gives pistols infinite ammo. Here they use pistol rounds or cells from the pouch. Ammo crates have them, and some dead enemies carry their sidearm's rounds.
+[*][b]HUD lines[/b] when it matters:
+    - "Last magazine: 37 rifle rounds left";
+    - "Out of spare rifle rounds";
+    - "Pouch full: max 240 rifle rounds";
+    - "+18 rifle rounds" or "No usable ammo" from a body;
+    - the totals from a crate.
+[/list]
+
+None of them play the game's warning alarm.
+[list]
+[*][b]On by default.[/b] [b]Shift+0[/b] (the top-row zero) switches it off: the game's limits come back. Press it again to switch it back on.
+[/list]
+
+[line]
+[size=5][b]Requirements[/b][/size]
+
+[list]
+[*]SpaceBourne 2 (Steam).
+[*][url=https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/v3.0.1]UE4SS 3.0.1[/url]. Installing HTR or the realism installer installs it too.
+[/list]
+
+[line]
+[size=5][b]Install[/b][/size]
+
+[list=1]
+[*]Download AmmoDiscipline-0.1.0.zip from the [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/releases]releases[/url].
+[*]Extract it into the game folder (...\steamapps\common\SpaceBourne 2\). It adds SB2\Binaries\Win64\Mods\AmmoDiscipline\, and the enabled.txt inside turns it on.
+[*]That's it: it is on in game.
+[/list]
+
+Manual install: copy the AmmoDiscipline folder from this repository into SpaceBourne 2\SB2\Binaries\Win64\Mods\.
+
+To uninstall, delete SB2\Binaries\Win64\Mods\AmmoDiscipline. The game's limits come back next time you play. Rounds that were left behind or never picked up do not come back.
+
+[b]Your save:[/b] the spare rounds are part of the game's own data, so the limits are saved with your game like any ammo you spend. Ammo Discipline writes no files of its own to your saves.
+
+[line]
+[size=5][b]Controls[/b][/size]
+
+[list]
+[*][b]Shift+0[/b]: Ammo Discipline on / off (on by default). Off = the game's limits and drops.
+[/list]
+
+0 is the zero above the letters, not the numeric keypad. The game never uses it. Plain 0 belongs to Ground Waypoints, which stays quiet while Shift is held. You can change the key with ToggleKey in scripts\config.lua. The game's own keys (F1–F6, F8, F10, F11, F12) are refused without Shift.
+
+[line]
+[size=5][b]Settings[/b][/size]
+
+Edit Mods\AmmoDiscipline\scripts\config.lua with Notepad. Every line is optional.
+[list]
+[*]Caps: the limit per ammo type.
+[*]TrimToLimit: whether extra rounds on an old save are left behind.
+[*]Scavenge:
+    - what bodies give: NothingChance (25 %), SpareMagazineChance (20 %), HeavyRoundsShare, RobotsCarryAmmo, SidearmChance;
+    - crates: CrateShare (30 %);
+    - loot: LootShare (50 %);
+    - Enemies, Crates and Loot switch each one off.
+[*]Reload.DropMagazine: false keeps the game's top-up reload.
+[*]Pistols.LimitedAmmo: false gives back infinite pistol ammo.
+[*]Messages: switch off any HUD line. DroppedMagazine adds a line on every reload.
+[/list]
+
+[line]
+[size=5][b]Works with the realism set[/b][/size]
+
+[list]
+[*][b]Hardcore Tactical Realism:[/b] HTR sets the enemies' magazines (30 or 40 rounds), and Ammo Discipline reads them when an enemy dies. HTR's ballistics are unchanged.
+[*][b]Tactical Engineering:[/b] your turret keeps its own 300 rounds and its refill at the ship. It does not use your pouch.
+[*][b]Silent Ops:[/b] fitting a suppressor still blocks firing as before.
+[*][b]Gear Without Levels:[/b] independent.
+[/list]
+
+[line]
+[size=5][b]Status and known limits[/b][/size]
+
+Tested in game on 2026-10-31, with HTR 0.4.8, Silent Ops, Split Controls, Gear Without Levels and SB2 HOTAS:
+[list]
+[*]limits on load: an old save's 999 rounds were cut to the limit plus one magazine;
+[*]a shop-style pickup stopping at the limit;
+[*]reloading with 10 rounds left: the magazine was dropped and a full one came from the pouch;
+[*]enemy drops: the game's 50–79 rounds became 17–39, of the type the enemy carried;
+[*]an ammo crate (100 → 30 of each type) and ammo lying around (40 → 20);
+[*]the pistol reloading from pistol rounds;
+[*]the on/off key with a real key press, off and on (tested as Shift+P; 0.1.0 ships Shift+0, the same mechanism, because the game closes windows on a raw P press);
+[*]frame times with and without the mod.
+[/list]
+
+Known limits:
+[list]
+[*][b]The game's ammo counter shows your spare rounds, not the limit.[/b] The limits show in the HUD lines above.
+[*][b]Enemies with no data.[/b] If the game drops ammo for an enemy Ammo Discipline did not see, you get a quarter of the game's amount.
+[*][b]Swapping weapons in the inventory[/b] unloads the magazine into your pouch. One magazine may sit on top of a full pouch.
+[/list]
+
+Design notes, research and the test log: [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/blob/main/DESIGN.md]DESIGN.md[/url].
+
+[line]
+[size=5][b]Part of the SpaceBourne 2 realism set[/b][/size]
+
+Part of the realism set, built around [url=https://www.nexusmods.com/spacebourne2/mods/4]Hardcore Tactical Realism[/url] as the core mod. HTR is not required: this mod works on its own or with any of the others. To install them all at once, use the installer: [url=https://github.com/hubertdungen/SpaceBourne2-Realism]SpaceBourne 2 Realism[/url] ([url=https://www.nexusmods.com/spacebourne2/mods/11]Nexus[/url]).
+
+[list]
+[*][b]Hardcore Tactical Realism (HTR): realistic ballistics and tactical AI[/b]: released: [url=https://github.com/hubertdungen/SpaceBourne2-HardcoreTacticalRealism]GitHub[/url] · [url=https://www.nexusmods.com/spacebourne2/mods/4]Nexus Mods[/url]
+[*][b]Split Controls: separate invert for ship and on foot[/b]: released: [url=https://github.com/hubertdungen/SpaceBourne2-SplitControls]GitHub[/url] · [url=https://www.nexusmods.com/spacebourne2/mods/5]Nexus Mods[/url]
+[*][b]Silent Ops: realistic stealth[/b]: released: [url=https://github.com/hubertdungen/SpaceBourne2-SilentOps]GitHub[/url] · [url=https://www.nexusmods.com/spacebourne2/mods/6]Nexus Mods[/url]
+[*][b]Gear Without Levels: use gear regardless of level[/b]: released: [url=https://github.com/hubertdungen/SpaceBourne2-GearWithoutLevels]GitHub[/url] · [url=https://www.nexusmods.com/spacebourne2/mods/7]Nexus Mods[/url]
+[*][b]SB2 HOTAS: HOTAS, triple screens, head tracking[/b]: released: [url=https://github.com/hubertdungen/SpaceBourne2-HOTAS]GitHub[/url] · [url=https://www.nexusmods.com/spacebourne2/mods/8]Nexus Mods[/url]
+[*][b]Faction Power: your faction's power and the galaxy's reaction[/b]: released: [url=https://github.com/hubertdungen/SpaceBourne2-FactionPower]GitHub[/url] · [url=https://www.nexusmods.com/spacebourne2/mods/9]Nexus Mods[/url]
+[*][b]Tactical Engineering: deployable turrets[/b]: released: [url=https://github.com/hubertdungen/SpaceBourne2-TacticalEngineering]GitHub[/url] · [url=https://www.nexusmods.com/spacebourne2/mods/10]Nexus Mods[/url]
+[*][b]Ammo Discipline: ammo limits and scavenging (this mod)[/b]: released: [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline]GitHub[/url]
+[*][b]Tactical First Person[/b]: coming
+[*][b]Ground Waypoints[/b]: coming
+[/list]
+
+[line]
+[size=5][b]Thanks[/b][/size]
+
+[b]TheCalcMan[/b] (Steam), for the idea of this mod and for play-testing the realism set.
+
+[line]
+[size=5][b]License[/b][/size]
+
+MIT. See [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/blob/main/LICENSE]LICENSE[/url].
