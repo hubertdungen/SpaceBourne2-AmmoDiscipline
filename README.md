@@ -51,7 +51,7 @@ with hundreds of rounds, the excess is left behind once, and the HUD says so.
   - the totals from a crate.
 
   None of them play the game's warning alarm.
-- **On by default.** **Shift+0** (the top-row zero) switches it off: the game's limits come back. Press it again to switch it back on.
+- **On by default.** **Shift+0** switches it off (the game's limits come back) and on again.
 
 ## Requirements
 
@@ -78,14 +78,7 @@ game like any ammo you spend. Ammo Discipline writes no files of its own to your
 
 ## Controls
 
-| Key | What it does |
-|---|---|
-| **Shift+0** | Ammo Discipline on / off (on by default). Off = the game's limits and drops. |
-
-0 is the zero above the letters, not the numeric keypad. The game never uses it. Plain 0 belongs to
-Ground Waypoints, which stays quiet while Shift is held. You can change the key with
-`ToggleKey` in `scripts\config.lua`. The game's own keys (F1–F6, F8, F10, F11, F12) are refused
-without Shift.
+**Shift+0** switches Ammo Discipline on/off (change it with `ToggleKey` in `scripts\config.lua`).
 
 ## Settings
 
@@ -120,8 +113,7 @@ Tested in game on 2026-10-31, with HTR 0.4.8, Silent Ops, Split Controls, Gear W
 - enemy drops: the game's 50–79 rounds became 17–39, of the type the enemy carried;
 - an ammo crate (100 → 30 of each type) and ammo lying around (40 → 20);
 - the pistol reloading from pistol rounds;
-- the on/off key with a real key press, off and on (tested as Shift+P; 0.1.0 ships Shift+0, the same
-  mechanism, because the game closes windows on a raw P press);
+- switching it off and on with a real key press;
 - frame times with and without the mod.
 
 Known limits:
