@@ -15,20 +15,21 @@ and the rest of the realism set.
 
 ## What it does
 
-- **Carry limits per ammo type.** These are the spare rounds you carry, with the game's own limit in brackets:
+**Carry limits per ammo type.** These are the spare rounds you carry, next to the game's own limit:
 
-  | Ammo | Limit | Game's limit |
-  |---|---|---|
-  | rifle and SMG rounds or cells | 240 | 999 |
-  | sniper and hunter rounds | 40 | 99 |
-  | laser sniper and hunter cells | 60 | 125 |
-  | shotgun shells | 32 | 299 |
-  | laser shotgun cells | 48 | 99 |
-  | pistol rounds or cells | 60 | 999 / 299 |
+| Ammo | Limit | Game's limit |
+|---|---|---|
+| rifle and SMG rounds or cells | 240 | 999 |
+| sniper and hunter rounds | 40 | 99 |
+| laser sniper and hunter cells | 60 | 125 |
+| shotgun shells | 32 | 299 |
+| laser shotgun cells | 48 | 99 |
+| pistol rounds or cells | 60 | 999 / 299 |
 
-  Rifle magazines hold 50 to 100 rounds, so 240 rounds is a few magazines, plus the one in your gun.
-  Once you reach a limit, pickups of that type stop, with "Pouch full" on the HUD. On an old save
-  with hundreds of rounds, the excess is left behind once, and the HUD says so.
+Rifle magazines hold 50 to 100 rounds, so 240 rounds is a few magazines, plus the one in your gun.
+Once you reach a limit, pickups of that type stop, with "Pouch full" on the HUD. On an old save
+with hundreds of rounds, the excess is left behind once, and the HUD says so.
+
 - **Dead enemies give what they carried.** The game gives 40 to 100 rounds of a random type from 70 % of
   the dead. With Ammo Discipline you get:
   - the rounds left in the enemy's magazine;
