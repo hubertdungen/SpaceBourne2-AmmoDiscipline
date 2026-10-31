@@ -8,7 +8,8 @@ Every magazine counts, and the weapon you bring matters.
 
 An idea by TheCalcMan (Steam).
 
-Version 0.1.0 · UE4SS Lua mod · [GitHub](https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline) ·
+Version 0.1.0 · UE4SS Lua mod · [Nexus Mods page](https://www.nexusmods.com/spacebourne2/mods/12) ·
+[GitHub](https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline) ·
 works alone or with [Hardcore Tactical Realism](https://github.com/hubertdungen/SpaceBourne2-HardcoreTacticalRealism)
 and the rest of the realism set.
 
@@ -149,7 +150,7 @@ To install them all at once, use the installer:
 | **SB2 HOTAS**: HOTAS, triple screens, head tracking | released: [GitHub](https://github.com/hubertdungen/SpaceBourne2-HOTAS) · [Nexus Mods](https://www.nexusmods.com/spacebourne2/mods/8) |
 | **Faction Power**: your faction's power and the galaxy's reaction | released: [GitHub](https://github.com/hubertdungen/SpaceBourne2-FactionPower) · [Nexus Mods](https://www.nexusmods.com/spacebourne2/mods/9) |
 | **Tactical Engineering**: deployable turrets | released: [GitHub](https://github.com/hubertdungen/SpaceBourne2-TacticalEngineering) · [Nexus Mods](https://www.nexusmods.com/spacebourne2/mods/10) |
-| **Ammo Discipline**: ammo limits and scavenging (this mod) | released: [GitHub](https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline) |
+| **Ammo Discipline**: ammo limits and scavenging (this mod) | released: [GitHub](https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline) · [Nexus Mods](https://www.nexusmods.com/spacebourne2/mods/12) |
 | Tactical First Person | coming |
 | Ground Waypoints | coming |
 
