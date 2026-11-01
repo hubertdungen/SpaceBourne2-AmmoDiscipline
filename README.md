@@ -8,7 +8,7 @@ Every magazine counts, and the weapon you bring matters.
 
 An idea by TheCalcMan (Steam).
 
-Version 0.1.0 · UE4SS Lua mod · [Nexus Mods page](https://www.nexusmods.com/spacebourne2/mods/12) ·
+Version 0.1.1 · UE4SS Lua mod · [Nexus Mods page](https://www.nexusmods.com/spacebourne2/mods/12) ·
 [GitHub](https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline) ·
 works alone or with [Hardcore Tactical Realism](https://github.com/hubertdungen/SpaceBourne2-HardcoreTacticalRealism)
 and the rest of the realism set.
@@ -56,19 +56,20 @@ with hundreds of rounds, the excess is left behind once, and the HUD says so.
 ## Requirements
 
 - SpaceBourne 2 (Steam).
-- [UE4SS 3.0.1](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/v3.0.1). Installing HTR or the
-  realism installer installs it too.
+- [UE4SS 3.0.1](https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/v3.0.1), a free script loader
+  for Unreal Engine games. Installing HTR or the realism set installer installs it too.
 
 ## Install
 
-1. Download `AmmoDiscipline-0.1.0.zip` from the
+Option A (recommended): the [SpaceBourne 2 Realism installer](https://www.nexusmods.com/spacebourne2/mods/11).
+
+Option B, manual:
+
+1. Download `AmmoDiscipline-0.1.1.zip` from the
    [releases](https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/releases).
 2. Extract it into the game folder (`...\steamapps\common\SpaceBourne 2\`). It adds
    `SB2\Binaries\Win64\Mods\AmmoDiscipline\`, and the `enabled.txt` inside turns it on.
 3. That's it: it is on in game.
-
-Manual install: copy the `AmmoDiscipline` folder from this repository into
-`SpaceBourne 2\SB2\Binaries\Win64\Mods\`.
 
 To uninstall, delete `SB2\Binaries\Win64\Mods\AmmoDiscipline`. The game's limits come back next time you
 play. Rounds that were left behind or never picked up do not come back.
@@ -106,6 +107,7 @@ Edit `Mods\AmmoDiscipline\scripts\config.lua` with Notepad. Every line is option
 
 ## Status and known limits
 
+<!-- nexus:skip -->
 Tested in game on 2026-10-31, with HTR 0.4.8, Silent Ops, Split Controls, Gear Without Levels and SB2 HOTAS:
 - limits on load: an old save's 999 rounds were cut to the limit plus one magazine;
 - a shop-style pickup stopping at the limit;
@@ -115,6 +117,10 @@ Tested in game on 2026-10-31, with HTR 0.4.8, Silent Ops, Split Controls, Gear W
 - the pistol reloading from pistol rounds;
 - switching it off and on with a real key press;
 - frame times with and without the mod.
+
+0.1.1 (the HUD number after a pickup, no lost rounds just after a load) was checked against the
+game's Blueprints; it has not been run in game yet.
+<!-- /nexus:skip -->
 
 Known limits:
 - **The game's ammo counter shows your spare rounds, not the limit.** The limits show in the HUD

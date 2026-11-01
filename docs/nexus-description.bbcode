@@ -4,7 +4,7 @@ You carry a few magazines, not a thousand rounds. A dead enemy gives you what wa
 
 An idea by TheCalcMan (Steam).
 
-Version 0.1.0 · UE4SS Lua mod · [url=https://www.nexusmods.com/spacebourne2/mods/12]Nexus Mods page[/url] · [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline]GitHub[/url] · works alone or with [url=https://github.com/hubertdungen/SpaceBourne2-HardcoreTacticalRealism]Hardcore Tactical Realism[/url] and the rest of the realism set.
+Version 0.1.1 · UE4SS Lua mod · [url=https://www.nexusmods.com/spacebourne2/mods/12]Nexus Mods page[/url] · [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline]GitHub[/url] · works alone or with [url=https://github.com/hubertdungen/SpaceBourne2-HardcoreTacticalRealism]Hardcore Tactical Realism[/url] and the rest of the realism set.
 
 [line]
 [size=5][b]What it does[/b][/size]
@@ -50,19 +50,21 @@ None of them play the game's warning alarm.
 
 [list]
 [*]SpaceBourne 2 (Steam).
-[*][url=https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/v3.0.1]UE4SS 3.0.1[/url]. Installing HTR or the realism installer installs it too.
+[*][url=https://github.com/UE4SS-RE/RE-UE4SS/releases/tag/v3.0.1]UE4SS 3.0.1[/url], a free script loader for Unreal Engine games. Installing HTR or the realism set installer installs it too.
 [/list]
 
 [line]
 [size=5][b]Install[/b][/size]
 
+Option A (recommended): the [url=https://www.nexusmods.com/spacebourne2/mods/11]SpaceBourne 2 Realism installer[/url].
+
+Option B, manual:
+
 [list=1]
-[*]Download AmmoDiscipline-0.1.0.zip from the [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/releases]releases[/url].
+[*]Download AmmoDiscipline-0.1.1.zip from the [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/releases]releases[/url].
 [*]Extract it into the game folder (...\steamapps\common\SpaceBourne 2\). It adds SB2\Binaries\Win64\Mods\AmmoDiscipline\, and the enabled.txt inside turns it on.
 [*]That's it: it is on in game.
 [/list]
-
-Manual install: copy the AmmoDiscipline folder from this repository into SpaceBourne 2\SB2\Binaries\Win64\Mods\.
 
 To uninstall, delete SB2\Binaries\Win64\Mods\AmmoDiscipline. The game's limits come back next time you play. Rounds that were left behind or never picked up do not come back.
 
@@ -103,18 +105,6 @@ Edit Mods\AmmoDiscipline\scripts\config.lua with Notepad. Every line is optional
 [line]
 [size=5][b]Status and known limits[/b][/size]
 
-Tested in game on 2026-10-31, with HTR 0.4.8, Silent Ops, Split Controls, Gear Without Levels and SB2 HOTAS:
-[list]
-[*]limits on load: an old save's 999 rounds were cut to the limit plus one magazine;
-[*]a shop-style pickup stopping at the limit;
-[*]reloading with 10 rounds left: the magazine was dropped and a full one came from the pouch;
-[*]enemy drops: the game's 50–79 rounds became 17–39, of the type the enemy carried;
-[*]an ammo crate (100 → 30 of each type) and ammo lying around (40 → 20);
-[*]the pistol reloading from pistol rounds;
-[*]switching it off and on with a real key press;
-[*]frame times with and without the mod.
-[/list]
-
 Known limits:
 [list]
 [*][b]The game's ammo counter shows your spare rounds, not the limit.[/b] The limits show in the HUD lines above.
@@ -122,7 +112,7 @@ Known limits:
 [*][b]Swapping weapons in the inventory[/b] unloads the magazine into your pouch. One magazine may sit on top of a full pouch.
 [/list]
 
-Design notes, research and the test log: [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/blob/main/DESIGN.md]DESIGN.md[/url].
+Design notes, research and the test log: [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/blob/mainDESIGN.md]DESIGN.md[/url].
 
 [line]
 [size=5][b]Part of the SpaceBourne 2 realism set[/b][/size]
@@ -152,4 +142,4 @@ Coming soon: Tactical First Person.
 [line]
 [size=5][b]License[/b][/size]
 
-MIT. See [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/blob/main/LICENSE]LICENSE[/url].
+MIT. See [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/blob/mainLICENSE]LICENSE[/url].

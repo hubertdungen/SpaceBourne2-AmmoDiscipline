@@ -106,6 +106,48 @@ function M.say(text, force)
     end
 end
 
+-- The spare-rounds number on the HUD ------------------------------------------------------------
+-- The game's on-foot HUD (Curved_Widget_Test) re-reads your spare rounds only 2 s after a reload
+-- or when you draw a weapon, never after a pickup (vanilla too). Next to our "+30 rifle rounds"
+-- line that looked as if nothing was given (TheCalcMan, 0.1.1). So after a pickup or a trim we
+-- write the number the game would show: the pouch of the weapon type in the HUD's weapon slot.
+local function grouped(n) -- the game shows 1,234
+    local s = tostring(math.floor(n))
+    while true do
+        local k
+        s, k = s:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
+        if k == 0 then return s end
+    end
+end
+
+local hudScheduled = false
+local function refreshHud()
+    hudScheduled = false
+    local gb = gameBuilder()
+    local pawn = gb and U.playerPawn(gb)
+    local pc = pawn and U.get(pawn, "Controller", nil)
+    local hud = U.valid(pc) and U.get(pc, "MyHUD", nil) or nil
+    local main = U.valid(hud) and U.get(hud, P.HudMain, nil) or nil
+    local w = U.valid(main) and U.get(main, P.HudCurved, nil) or nil
+    if not U.valid(w) then return end
+    local idx = U.num(w, P.HudSlot, -1)
+    local s = P.Slots[idx] and U.get(gb, P.Slots[idx], nil)
+    local t = s and G.TypeByRow[U.str(U.get(s, P.SlotAmmoType, ""))]
+    if not t then return end
+    local e = entryOf(gb, t)
+    local text = U.get(w, P.HudSpare, nil)
+    if not U.valid(text) then return end
+    local n = e and U.num(e, P.Current, 0) or 0
+    pcall(function() text:SetText(FText(grouped(n))) end)
+end
+
+-- After the source hook of the same call had its say (it may still change the pouch).
+function M.refreshHudSoon()
+    if hudScheduled then return end
+    hudScheduled = true
+    ExecuteWithDelay(80, function() ExecuteInGameThread(refreshHud) end)
+end
+
 -- Give n rounds of type t, within the limit; never takes rounds away. Returns gained, full.
 local function grant(gb, t, n)
     local e = entryOf(gb, t)
@@ -205,7 +247,10 @@ function M.onAddAmmo(selfP, rowP, amountP, byNameP, nameP)
     if after < c then
         before = math.max(0, after - amount)                   -- the game did not clamp: exact
     else
-        before = M.snap[t.row] or math.max(0, after - amount)  -- clamped: the last value we saw
+        -- Clamped: the last value we saw. Without one (just after a load) assume nothing was
+        -- added, so taking the add back can never cost rounds (0.1.0 used after - amount here,
+        -- which could take rounds away from a pouch near its limit).
+        before = M.snap[t.row] or after
     end
     local final = math.max(before, math.min(c, before + amount)) -- a pickup never takes rounds away
     if final ~= after then U.set(e, P.Current, final) end
@@ -232,6 +277,7 @@ function M.onAddAmmo(selfP, rowP, amountP, byNameP, nameP)
         end)
     end)
     U.log(string.format("+%d %s: %d -> %d", amount, t.row, before, final))
+    M.refreshHudSoon()
 end
 
 -- Sources ---------------------------------------------------------------------------------------
@@ -435,6 +481,7 @@ local function applyLimits(gb)
         M.notified.trim = true
         M.say("Carry limits: spare ammo above them left behind")
     end
+    if #trimmed > 0 then M.refreshHudSoon() end
 end
 
 local function restoreVanilla(gb)
@@ -450,6 +497,11 @@ function M.poll(now)
         if now >= nextApply and now >= (M.applyAt or 0) then
             nextApply = now + 2
             applyLimits(gb)
+        elseif now < (M.applyAt or 0) then
+            -- while the save settles: remember what the pouch holds, for a pickup in those seconds
+            eachEntry(gb, function(t, e)
+                if M.snap[t.row] == nil then M.snap[t.row] = U.num(e, P.Current, 0) end
+            end)
         end
         if cfg.Pistols.LimitedAmmo then setPistolInfinite(gb, false) end
     end

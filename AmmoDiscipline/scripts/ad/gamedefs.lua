@@ -71,6 +71,10 @@ G.P = {
     Sniper = "IsSniper?", Robot = "Robot?", Boss = "IsBoss",
     -- loot
     LootIsAmmo = "Ammo?",
+    -- on-foot HUD: Q1Hud -> Ship_MainWidget_C -> Curved_Widget_Test_C, whose SubGoalText_7 shows the
+    -- spare rounds for the weapon at CurrentlyEquipedIndex
+    HudMain = "Ship Main Widget", HudCurved = "Curved_Widget_Test",
+    HudSlot = "CurrentlyEquipedIndex", HudSpare = "SubGoalText_7",
 }
 
 -- Functions we call ----------------------------------------------------------------------

@@ -11,7 +11,7 @@
   Design notes and the test log: DESIGN.md in the repository.
 ]]
 
-local VERSION = "0.1.0"
+local VERSION = "0.1.1"
 
 local U = require("ad.util")
 

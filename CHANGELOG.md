@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.1 (2026-11-01)
+
+Thanks to **TheCalcMan** (Steam) for the report.
+
+- **The ammo counter now goes up when you pick ammo up.** The game only refreshes the spare-rounds
+  number on the HUD after a reload or when you draw a weapon, so "+30 rifle rounds" showed but the
+  number stayed the same until your next reload. The rounds were in your pouch all along; now the
+  number changes right away.
+- **A pickup can no longer cost you rounds just after loading a save.** In the first seconds after a
+  load, a crate or a body could leave a nearly full pouch with fewer rounds than before.
+- Install section: the realism set installer first, the manual install second.
+
 ## 0.1.0 (2026-10-31)
 
 First release. Idea: **TheCalcMan** (Steam).
