@@ -11,6 +11,7 @@
 
 local U = require("ad.util")
 local G = require("ad.gamedefs")
+local GT = require("ad.gametick") -- timed work on the game thread (0.1.3: no ExecuteWithDelay)
 local P = G.P
 
 local M = {
@@ -89,7 +90,7 @@ local function flush()
     local now = os.clock()
     if now - lastShown < GAP and not pending.force then
         flushScheduled = true
-        ExecuteWithDelay(math.floor((GAP - (now - lastShown)) * 1000) + 50, function() ExecuteInGameThread(flush) end)
+        GT.after(GAP - (now - lastShown) + 0.05, flush)
         return
     end
     local gb = gameBuilder()
@@ -103,7 +104,7 @@ function M.say(text, force)
     pending = { text = text, force = force }
     if not flushScheduled then
         flushScheduled = true
-        ExecuteWithDelay(60, function() ExecuteInGameThread(flush) end)
+        GT.after(0.06, flush)
     end
 end
 
@@ -164,7 +165,7 @@ end
 function M.refreshHudSoon(ms)
     if hudScheduled then return end
     hudScheduled = true
-    ExecuteWithDelay(ms or 80, function() ExecuteInGameThread(refreshHud) end)
+    GT.after((ms or 80) / 1000, refreshHud)
 end
 
 -- Give n rounds of type t, within the limit; never takes rounds away. Returns gained, full.
@@ -283,25 +284,21 @@ function M.onAddAmmo(selfP, rowP, amountP, byNameP, nameP)
     local rec = { t = t, amount = amount, before = before, final = final, time = now }
     M.recent[#M.recent + 1] = rec
     -- unclaimed after the call: a source we do not know; look for crates and loot again
-    ExecuteWithDelay(60, function()
-        ExecuteInGameThread(function()
-            for _, r in ipairs(M.recent) do
-                if not r.claimed and os.clock() - r.time < 1 then
-                    if M.wake then M.wake() end
-                    return
-                end
+    GT.after(0.06, function()
+        for _, r in ipairs(M.recent) do
+            if not r.claimed and os.clock() - r.time < 1 then
+                if M.wake then M.wake() end
+                return
             end
-        end)
+        end
     end)
     U.log(string.format("+%d %s: %d -> %d", amount, t.row, before, final))
     rec.time = os.clock() -- after the log: a slow log write must not hide this add from its source
     -- "Pouch full" only if no source took the add back (a dead enemy's case first takes it all back,
     -- then gives its own rounds; test 10 showed the line anyway)
     if cfg.Messages.PouchFull and before + amount > final then
-        ExecuteWithDelay(40, function()
-            ExecuteInGameThread(function()
-                if not rec.claimed then M.say(string.format("Pouch full: max %d %s", c, label(t))) end
-            end)
+        GT.after(0.04, function()
+            if not rec.claimed then M.say(string.format("Pouch full: max %d %s", c, label(t))) end
         end)
     end
     M.refreshHudSoon()
@@ -458,9 +455,7 @@ function M.onCrateOpened(selfP)
     if not (M.on and cfg.Scavenge.Crates) then return end
     if shareSource(selfP, cfg.Scavenge.CrateShare, "Ammo crate") then return end
     -- nothing to claim yet: look again once the lid's call is over (test 10: a crate gave +100)
-    ExecuteWithDelay(100, function()
-        ExecuteInGameThread(function() shareSource(nil, cfg.Scavenge.CrateShare, "Ammo crate") end)
-    end)
+    GT.after(0.1, function() shareSource(nil, cfg.Scavenge.CrateShare, "Ammo crate") end)
 end
 
 function M.onLoot(selfP)
@@ -579,7 +574,7 @@ end
 local dryVolume, lastDry, dryMuted = nil, 0, false
 local function dryCheck()
     if os.clock() - lastDry < 0.6 then
-        ExecuteWithDelay(300, function() ExecuteInGameThread(dryCheck) end)
+        GT.after(0.3, dryCheck)
         return
     end
     local s = StaticFindObject(G.DryClick)
@@ -600,7 +595,7 @@ function M.onDryFire()
     end
     dryMuted = true
     pcall(function() snd.Volume = 0.0 end)
-    ExecuteWithDelay(700, function() ExecuteInGameThread(dryCheck) end)
+    GT.after(0.7, dryCheck)
 end
 
 return M

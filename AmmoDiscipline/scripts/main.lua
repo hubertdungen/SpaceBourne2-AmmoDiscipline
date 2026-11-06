@@ -11,7 +11,7 @@
   Design notes and the test log: DESIGN.md in the repository.
 ]]
 
-local VERSION = "0.1.2"
+local VERSION = "0.1.3"
 
 local U = require("ad.util")
 
@@ -81,24 +81,28 @@ U.warn(string.format("=== Ammo Discipline %s loaded: %s, key %s ===", VERSION, M
 
 -- Poll --------------------------------------------------------------------------------------------
 local lastStatus, profileAt = "", os.clock() + 30
-LoopAsync(1000, function()
-    ExecuteInGameThread(function()
-        local now = os.clock()
-        local ok, err = pcall(function()
-            H.poll(now)
-            M.poll(now)
-        end)
-        if not ok then U.warn("poll: " .. tostring(err)) end
-        if U.Verbose and now > profileAt then
-            profileAt = now + 30
-            local prof = H.profile()
-            if prof ~= "" then U.log("profile 30 s: " .. prof) end
-        end
-        local on, off = H.status()
-        local s = string.format("hooks active %d, waiting %d", on, off)
-        if s ~= lastStatus then lastStatus = s; U.log(s) end
+-- Once a second on the game thread, pumped by the ALS character tick (gametick.lua, 0.1.3). Until
+-- 0.1.2 this was LoopAsync + ExecuteInGameThread: called from UE4SS's async thread,
+-- ExecuteInGameThread writes a map all mods share without a lock, and two mods doing it at once
+-- crashed the game (UE4SS.dll+0x87c104). After each load (ClientRestart) the pump hook is set again.
+local GT = require("ad.gametick")
+GT.log = function(msg) U.warn(msg) end
+GT.drive(GT.FOOT_TICK, "foot")
+GT.boot()
+GT.every(1.0, function(now)
+    local ok, err = pcall(function()
+        H.poll(now)
+        M.poll(now)
     end)
-    return false
+    if not ok then U.warn("poll: " .. tostring(err)) end
+    if U.Verbose and now > profileAt then
+        profileAt = now + 30
+        local prof = H.profile()
+        if prof ~= "" then U.log("profile 30 s: " .. prof) end
+    end
+    local on, off = H.status()
+    local s = string.format("hooks active %d, waiting %d", on, off)
+    if s ~= lastStatus then lastStatus = s; U.log(s) end
 end)
 
 -- On/off key ----------------------------------------------------------------------------------------
