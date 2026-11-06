@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.1.2 (2026-11-06)
+
+Thanks to **TheCalcMan** (Steam) for the reports.
+
+- **The ammo counter follows your pickups (for real this time).** 0.1.1 looked for the HUD in the
+  wrong place on foot, so the number still changed only on your next reload. Now the HUD re-reads
+  your spare rounds right after each pickup.
+- **Crates and loot no longer fill you up.** A crate gives about a quarter of your limit for each
+  type (about 60 rifle rounds, 8 shotgun shells), ammo lying around about 15 % (about 36 rifle
+  rounds), give or take a quarter. 0.1.1 gave a share of the game's own amount, which filled a
+  shotgun or sniper pouch in one go.
+- **No more "tututu".** The game's HUD beeped on every Ammo Discipline line. The lines are now
+  silent, stay about 5 seconds, and the same line shows at most once in 30 seconds. The
+  "+18 rifle rounds" line for each pickup is off by default (`Messages.Pickups`): the counter shows it.
+- **One click on an empty gun.** Holding the trigger on an empty gun clicked five times a second;
+  now it clicks once per trigger pull (`Reload.OneDryClick`).
+- A dead enemy's ammo case no longer shows "Pouch full" for rounds you did not get.
+- Tested in game with HTR 0.4.11, Silent Ops 0.3.2 and Gear Without Levels 0.1.1.
+
 ## 0.1.1 (2026-11-01)
 
 Thanks to **TheCalcMan** (Steam) for the report.

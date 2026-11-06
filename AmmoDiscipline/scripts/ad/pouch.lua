@@ -82,18 +82,19 @@ end
 -- Lines are collected during a call and shown a moment later (a source hook may still change the
 -- result), at most one every 2 s; the newest wins.
 local pending, flushScheduled, lastShown = nil, false, -1e9
+local GAP = 5.0 -- s: a line stays about 5 s (ad/hudmsg.lua); the next one waits for it
 local function flush()
     flushScheduled = false
     if not pending then return end
     local now = os.clock()
-    if now - lastShown < 2.0 and not pending.force then
+    if now - lastShown < GAP and not pending.force then
         flushScheduled = true
-        ExecuteWithDelay(math.floor((2.0 - (now - lastShown)) * 1000) + 50, function() ExecuteInGameThread(flush) end)
+        ExecuteWithDelay(math.floor((GAP - (now - lastShown)) * 1000) + 50, function() ExecuteInGameThread(flush) end)
         return
     end
     local gb = gameBuilder()
     local pawn = gb and U.playerPawn(gb)
-    if pawn and U.notify(pawn, pending.text) then lastShown = now end
+    if pawn and U.notify(pawn, pending.text, pending.force) then lastShown = now end
     pending = nil
 end
 
@@ -110,42 +111,60 @@ end
 -- The game's on-foot HUD (Curved_Widget_Test) re-reads your spare rounds only 2 s after a reload
 -- or when you draw a weapon, never after a pickup (vanilla too). Next to our "+30 rifle rounds"
 -- line that looked as if nothing was given (TheCalcMan, 0.1.1). So after a pickup or a trim we
--- write the number the game would show: the pouch of the weapon type in the HUD's weapon slot.
-local function grouped(n) -- the game shows 1,234
-    local s = tostring(math.floor(n))
-    while true do
-        local k
-        s, k = s:gsub("^(-?%d+)(%d%d%d)", "%1,%2")
-        if k == 0 then return s end
-    end
+-- run the HUD's own reload handler (CustomEvent_13), which re-reads the count 2 s later with the
+-- game's own code. (0.1.2 builds wrote the text from Lua; one test game closed right after that,
+-- so the mod no longer makes any text itself.)
+
+-- Finding that HUD widget. 0.1.1 went through Q1Hud's "Ship Main Widget" property, which is empty
+-- on foot, so nothing was refreshed (TheCalcMan). The game keeps it on the player controller
+-- (Q1Controller.ShipMainWidget, as Q1FunctionLibary:GetShipMainWidget reads it); the HUD is a child
+-- of it. Direct references only: no search of all objects (test builds that searched closed the
+-- game during loads).
+local function hudWidget(pc)
+    local main = U.valid(pc) and U.get(pc, P.HudMain, nil) or nil
+    if not U.valid(main) then return nil end
+    local w = U.get(main, P.HudCurved, nil)
+    if U.valid(w) then return w end
+    local ok, r = pcall(function() return main:GetWidgetFromName(FName(P.HudCurved)) end)
+    return ok and U.valid(r) and r or nil
 end
 
-local hudScheduled = false
+local hudScheduled, hudRetried = false, false
+local pcPath -- the player controller found last time, found again by path (no search)
+local function pathOf(o)
+    local ok, full = pcall(function() return o:GetFullName() end)
+    return ok and type(full) == "string" and full:match("^%S+%s+(.+)$") or nil
+end
 local function refreshHud()
     hudScheduled = false
     local gb = gameBuilder()
-    local pawn = gb and U.playerPawn(gb)
-    local pc = pawn and U.get(pawn, "Controller", nil)
-    local hud = U.valid(pc) and U.get(pc, "MyHUD", nil) or nil
-    local main = U.valid(hud) and U.get(hud, P.HudMain, nil) or nil
-    local w = U.valid(main) and U.get(main, P.HudCurved, nil) or nil
-    if not U.valid(w) then return end
-    local idx = U.num(w, P.HudSlot, -1)
-    local s = P.Slots[idx] and U.get(gb, P.Slots[idx], nil)
-    local t = s and G.TypeByRow[U.str(U.get(s, P.SlotAmmoType, ""))]
-    if not t then return end
-    local e = entryOf(gb, t)
-    local text = U.get(w, P.HudSpare, nil)
-    if not U.valid(text) then return end
-    local n = e and U.num(e, P.Current, 0) or 0
-    pcall(function() text:SetText(FText(grouped(n))) end)
+    local pc = pcPath and StaticFindObject(pcPath)
+    local why = "no game builder"
+    if not U.valid(pc) then
+        pc = nil
+        if gb then
+            local ok, r = pcall(function() return U.gameplayStatics():GetPlayerController(gb, 0) end)
+            if ok and U.valid(r) then pc = r else why = tostring(r) end
+        end
+    end
+    if pc then pcPath = pathOf(pc) end
+    local w = hudWidget(pc)
+    if not w then
+        U.log("HUD widget not found (" .. (pc and "no HUD under ShipMainWidget" or ("no player controller: " .. why)) .. ")")
+        if not hudRetried then hudRetried = true; M.refreshHudSoon(600) end -- once more, a moment later
+        return
+    end
+    hudRetried = false
+    -- (Publisher, Payload, Metadata): the handler only stores them; any object will do
+    local ok, err = pcall(function() w[P.HudRefresh](w, w, w, {}) end)
+    U.log("HUD spare count refresh asked: " .. (ok and "ok" or tostring(err)))
 end
 
 -- After the source hook of the same call had its say (it may still change the pouch).
-function M.refreshHudSoon()
+function M.refreshHudSoon(ms)
     if hudScheduled then return end
     hudScheduled = true
-    ExecuteWithDelay(80, function() ExecuteInGameThread(refreshHud) end)
+    ExecuteWithDelay(ms or 80, function() ExecuteInGameThread(refreshHud) end)
 end
 
 -- Give n rounds of type t, within the limit; never takes rounds away. Returns gained, full.
@@ -261,10 +280,8 @@ function M.onAddAmmo(selfP, rowP, amountP, byNameP, nameP)
     for i = #M.recent, 1, -1 do
         if now - M.recent[i].time > 1 then table.remove(M.recent, i) end
     end
-    M.recent[#M.recent + 1] = { t = t, amount = amount, before = before, final = final, time = now }
-    if cfg.Messages.PouchFull and before + amount > final then
-        M.say(string.format("Pouch full: max %d %s", c, label(t)))
-    end
+    local rec = { t = t, amount = amount, before = before, final = final, time = now }
+    M.recent[#M.recent + 1] = rec
     -- unclaimed after the call: a source we do not know; look for crates and loot again
     ExecuteWithDelay(60, function()
         ExecuteInGameThread(function()
@@ -277,16 +294,26 @@ function M.onAddAmmo(selfP, rowP, amountP, byNameP, nameP)
         end)
     end)
     U.log(string.format("+%d %s: %d -> %d", amount, t.row, before, final))
+    rec.time = os.clock() -- after the log: a slow log write must not hide this add from its source
+    -- "Pouch full" only if no source took the add back (a dead enemy's case first takes it all back,
+    -- then gives its own rounds; test 10 showed the line anyway)
+    if cfg.Messages.PouchFull and before + amount > final then
+        ExecuteWithDelay(40, function()
+            ExecuteInGameThread(function()
+                if not rec.claimed then M.say(string.format("Pouch full: max %d %s", c, label(t))) end
+            end)
+        end)
+    end
     M.refreshHudSoon()
 end
 
 -- Sources ---------------------------------------------------------------------------------------
 -- The pickups recorded during the current call (newest first), claimed and taken back.
-local function takeBack(gb)
+local function takeBack(gb, window)
     local now, list = os.clock(), {}
     for i = #M.recent, 1, -1 do
         local r = M.recent[i]
-        if not r.claimed and now - r.time <= SAME_CALL then
+        if not r.claimed and now - r.time <= (window or SAME_CALL) then
             r.claimed = true
             list[#list + 1] = r
         end
@@ -400,26 +427,40 @@ function M.onCase(selfP)
         c and c.info and "enemy known" or "enemy unknown"))
 end
 
+-- Crates and ammo lying around give a share of your carry limit for that type, give or take a
+-- quarter, never more than the game's own amount. 0.1.1 gave a share of the game's amount (100 per
+-- crate, 88-114 on the ground), which filled a 32-shell or 40-round pouch in one go (user, 0.1.2).
+local function shareOfLimit(t, share, gameAmount)
+    local n = math.floor(cap(t) * share * (0.75 + math.random() * 0.5) + 0.5)
+    return math.max(1, math.min(n, gameAmount))
+end
+
 local function shareSource(selfP, share, what)
     local gb = gameBuilder()
     if not gb then return end
-    local list = takeBack(gb)
+    local list = takeBack(gb, 0.25) -- crates and loot: all their adds come within one frame
+    U.log(string.format("%s: %d adds claimed", what, #list))
     if #list == 0 then return end
     local gains = {}
     for i = #list, 1, -1 do -- oldest first
         local r = list[i]
-        local gained = grant(gb, r.t, math.floor(r.amount * share + 0.5))
+        local gained = grant(gb, r.t, shareOfLimit(r.t, share, r.amount))
         gains[#gains + 1] = { t = r.t, n = gained }
     end
     if cfg.Messages.Pickups then
         local s = summary(gains)
         M.say(what .. ": " .. (s ~= "" and s or "pouch full"))
     end
+    return true
 end
 
 function M.onCrateOpened(selfP)
-    if not (M.on and cfg.Scavenge.Crates) or #M.recent == 0 then return end
-    shareSource(selfP, cfg.Scavenge.CrateShare, "Ammo crate")
+    if not (M.on and cfg.Scavenge.Crates) then return end
+    if shareSource(selfP, cfg.Scavenge.CrateShare, "Ammo crate") then return end
+    -- nothing to claim yet: look again once the lid's call is over (test 10: a crate gave +100)
+    ExecuteWithDelay(100, function()
+        ExecuteInGameThread(function() shareSource(nil, cfg.Scavenge.CrateShare, "Ammo crate") end)
+    end)
 end
 
 function M.onLoot(selfP)
@@ -528,6 +569,38 @@ function M.status()
         parts[#parts + 1] = string.format("%s %d/%d", t.row, U.num(e, P.Current, -1), U.num(e, P.Max, -1))
     end)
     return (M.on and "ON" or "OFF") .. " | " .. table.concat(parts, ", ")
+end
+
+-- Dry fire ---------------------------------------------------------------------------------------
+-- Holding the trigger on an empty gun, the game clicks every 0.2 s (PlayOutOfAmmoSound). In vanilla
+-- that hardly ever happens (999 rounds, endless pistol); with real limits it became a constant
+-- "tututu" (user, 0.1.2). Now the first click plays, then the click is muted until 0.6 s pass without
+-- one: one click per trigger pull. Same volume trick as the HUD alarm in util.lua.
+local dryVolume, lastDry, dryMuted = nil, 0, false
+local function dryCheck()
+    if os.clock() - lastDry < 0.6 then
+        ExecuteWithDelay(300, function() ExecuteInGameThread(dryCheck) end)
+        return
+    end
+    local s = StaticFindObject(G.DryClick)
+    if U.valid(s) and dryVolume then pcall(function() s.Volume = dryVolume end) end
+    dryMuted = false
+end
+
+function M.onDryFire()
+    if not M.on then return end
+    lastDry = os.clock()
+    if dryMuted then return end
+    local snd = StaticFindObject(G.DryClick)
+    if not U.valid(snd) then return end
+    if dryVolume == nil then
+        local ok, v = pcall(function() return snd.Volume end)
+        if not (ok and type(v) == "number" and v > 0) then return end
+        dryVolume = v
+    end
+    dryMuted = true
+    pcall(function() snd.Volume = 0.0 end)
+    ExecuteWithDelay(700, function() ExecuteInGameThread(dryCheck) end)
 end
 
 return M

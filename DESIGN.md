@@ -83,8 +83,12 @@ What each source gives:
   - Rounds: those left in its magazine, scaled by caliber.
   - `SpareMagazineChance`: one more partial magazine. `NothingChance`: nothing usable.
   - With no enemy data, it keeps `FallbackShare` of the game's amount.
-- **Crate:** `CrateShare` of each 100.
-- **Loot:** `LootShare`.
+- **Crate:** `CrateShare` of the type's limit, give or take a quarter, never more than the game's 100.
+- **Loot:** `LootShare` of the limit, the same way. 0.1.1 gave a share of the game's amount, which
+  filled a 32-shell or 40-round pouch in one go.
+- Crate and loot adds are claimed if they came in the last 0.25 s, and a crate looks again 0.1 s
+  later. With the 4 ms window a crate gave its full 100 in test 10: a slow log write came between
+  the adds and the crate's hook.
 - **Unknown sources (shops, rewards):** untouched, only clamped. You paid for them.
 
 ### Reload (`Reload.DropMagazine`)
@@ -103,11 +107,22 @@ use small rounds. Enemy cases sometimes contain sidearm rounds (`SidearmChance`)
 it can be on by default (section 4).
 
 ### HUD
-`TMWPerkWarning` on the player, the same as HTR and TE. The GUI_Cant alarm is muted for 2 s (`Messages.Quiet`).
+`TMWPerkWarning` on the player, the same as HTR and TE. The game's HUD (`Curved_Widget_Test`, its
+`TMW_PerkWarning` handler) plays `Beep_Tech_08` on every line and hides the line 2 s after the last
+one. `ad/hudmsg.lua`, the same file in Silent Ops and Gear Without Levels, mutes that beep around our
+lines (`Messages.Quiet`), sends a line again quietly every 1.5 s for about 5 s, and skips a line shown
+in the last 30 s. Older builds muted GUI_Cant, the wrong sound.
+
+The spare-rounds number is refreshed after each pickup by calling the HUD's own `CustomEvent_13` (its
+reload handler, which re-reads the count 2 s later), found through `Q1Controller.ShipMainWidget`.
+0.1.1 went through `Q1Hud."Ship Main Widget"`, which is empty on foot.
 - When ammo runs low after a reload: "Last magazine: 37 rifle rounds left" or "Out of spare rifle rounds".
 - When a limit stops a pickup: "Pouch full: 240 rifle rounds".
-- Pickups: "+18 rifle rounds" or "No usable ammo".
-- Messages come at most once every 2 s, except the on/off message.
+- Pickups (off by default since 0.1.2): "+18 rifle rounds" or "No usable ammo".
+- Messages come at most once every 5 s, except the on/off message.
+- Empty gun: `Master_Hand_Weapon:PlayOutOfAmmoSound` plays `Weapon_Empty_SoundFx` every 0.2 s while
+  the trigger is held. After the first click the sound's volume is 0 until 0.6 s pass without a call
+  (`Reload.OneDryClick`).
 
 ### Toggle
 `Shift+0` (top-row zero). First choice was `Shift+P`: P is unbound in every preset. But the Ground
@@ -143,7 +158,8 @@ Rifle magazines in SB2 hold 50 to 100 rounds (`C_W_MAG = rand(40,60) + 10 x tier
 magazines hold 10 to 30.
 - Defaults give about 3 to 5 rifle magazines (240 rounds), a few reloads for shotguns (32 shells), and
   40 sniper rounds.
-- Crates give 30 % (30 of each type).
+- Crates give 25 % of each limit (about 60 rifle rounds, 8 shotgun shells); ammo lying around 15 %
+  (about 36 rifle rounds).
 - An enemy drops what was left in its magazine, so about 15 rifle rounds on average, with a 20 % chance
   of a spare magazine and a 25 % chance of nothing.
 
@@ -200,3 +216,20 @@ Results:
   pouch full.
 - **Windows lock screen:** while the PC was locked, the game died during start-up with no crash
   report. That is not related to the mod.
+
+2026-11-03 to 11-06, 0.1.1 and 0.1.2 (slot CALCTest; HTR 0.4.11, Silent Ops 0.3.2, Gear Without Levels
+0.1.1 and the rest of the set):
+- **HUD number:** `Q1Controller.ShipMainWidget.Curved_Widget_Test` and its `CustomEvent_13` made the
+  HUD equal the pouch after loot, a crate and enemy drops. Writing the text from Lua (`SetText`) and
+  searching for the widget (`FindAllOf`) were dropped: three test games closed about 10 s after the
+  search, at the menu or a level load.
+- **Crate** (spawned `AmmoCrate_C`, `Interact`), every type lowered to 5: test 10 gave +100 of each
+  (see Scavenging). With the 0.25 s window: rifle +50, sniper +8, shotgun +7, cells +12 to +54.
+- **Loot** (`Ammo_C` with 100 rifle rounds): +32 and +40.
+- **Enemy drops:** a case of 86 shotgun shells for a rifle enemy was taken back; the "Pouch full"
+  line it showed in test 10 is gone.
+- **HUD lines:** beep volume 0 while shown, the line still on screen after 3 s, a repeat within
+  30 s skipped.
+- **Empty rifle, trigger held 1.2 s:** click volume 0 after the first click, normal after release.
+- The game ran normally in both launches. One earlier launch died 17 s after loading because no
+  display was connected (not the mod).

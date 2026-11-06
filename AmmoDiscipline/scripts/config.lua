@@ -46,8 +46,10 @@ return {
         SidearmChance       = 0.20, -- their sidearm's rounds instead (with Pistols.LimitedAmmo)
         FallbackShare       = 0.25, -- share of the game's amount when the enemy is unknown
 
-        Crates    = true, CrateShare = 0.30, -- ammo crates (vanilla: 100 of each type)
-        Loot      = true, LootShare  = 0.50, -- ammo lying around
+        -- Crates and ammo lying around give this share of your limit for that type, give or take a
+        -- quarter (vanilla: 100 of each type from a crate, 88-114 from the ground).
+        Crates    = true, CrateShare = 0.25, -- crate: rifle 60, pistol 15, shotgun 8, sniper 10
+        Loot      = true, LootShare  = 0.15, -- ground: rifle 36, pistol 9, shotgun 5, sniper 6
         -- Shops and rewards are never reduced (you paid); they only stop at the limit.
     },
 
@@ -55,6 +57,9 @@ return {
         -- Reloading drops the magazine in the weapon: the rounds left in it are lost, the new
         -- magazine comes from your pouch. false = vanilla (the rounds go back into the pouch).
         DropMagazine = true,
+        -- An empty gun clicks once per trigger pull, not every 0.2 s while you hold the trigger.
+        -- false = the game's clicking.
+        OneDryClick = true,
     },
 
     Pistols = {
@@ -67,9 +72,9 @@ return {
     Messages = {
         LowAmmo         = true, -- "Last magazine: 37 rifle rounds left" / "Out of spare rifle rounds"
         PouchFull       = true, -- "Pouch full: 240 rifle rounds" (a limit stopped a pickup)
-        Pickups         = true, -- "+18 rifle rounds" / "No usable ammo" from bodies, crates and loot
+        Pickups         = false, -- "+18 rifle rounds" / "No usable ammo" (the HUD count shows it anyway)
         DroppedMagazine = false, -- "Magazine dropped: 12 rounds lost" on every reload
-        -- Our HUD lines use the game's warning; true = without its alarm sound (like HTR).
+        -- Lines stay about 5 s; the same line at most once per 30 s. true = without the HUD's beep.
         Quiet = true,
     },
 

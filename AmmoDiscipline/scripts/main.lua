@@ -11,7 +11,7 @@
   Design notes and the test log: DESIGN.md in the repository.
 ]]
 
-local VERSION = "0.1.1"
+local VERSION = "0.1.2"
 
 local U = require("ad.util")
 
@@ -22,10 +22,10 @@ local defaults = {
         Laser_Shell = 48, Small_Bullet = 60, Small_Laser = 60 },
     Scavenge = { Enemies = true, NothingChance = 0.25, SpareMagazineChance = 0.20, HeavyRoundsShare = 0.30,
         RobotsCarryAmmo = false, SidearmChance = 0.20, FallbackShare = 0.25,
-        Crates = true, CrateShare = 0.30, Loot = true, LootShare = 0.50 },
-    Reload = { DropMagazine = true },
+        Crates = true, CrateShare = 0.25, Loot = true, LootShare = 0.15 },
+    Reload = { DropMagazine = true, OneDryClick = true },
     Pistols = { LimitedAmmo = true },
-    Messages = { LowAmmo = true, PouchFull = true, Pickups = true, DroppedMagazine = false, Quiet = true },
+    Messages = { LowAmmo = true, PouchFull = true, Pickups = false, DroppedMagazine = false, Quiet = true },
     Debug = { Log = false, SlowHookMs = 8 },
 }
 
@@ -46,7 +46,7 @@ if not okCfg or type(cfg) ~= "table" then
 end
 fill(cfg, defaults)
 U.Verbose = cfg.Debug.Log == true
-U.Quiet = cfg.Messages.Quiet ~= false
+require("ad.hudmsg").Quiet = cfg.Messages.Quiet ~= false
 
 if cfg.Enabled == false then
     U.warn("Ammo Discipline " .. VERSION .. " loaded, disabled in config.lua (Enabled = false)")
@@ -74,6 +74,7 @@ if cfg.Scavenge.Enemies then
 end
 if cfg.Scavenge.Crates then H.add(G.Fn.CrateOpened, M.onCrateOpened, "ammo crate", "wake") end
 if cfg.Scavenge.Loot then H.add(G.Fn.LootInteract, M.onLoot, "ammo loot", "wake") end
+if cfg.Reload.OneDryClick then H.add(G.Fn.DryFire, M.onDryFire, "dry fire") end
 
 U.warn(string.format("=== Ammo Discipline %s loaded: %s, key %s ===", VERSION, M.on and "ON" or "OFF",
     cfg.ToggleKey ~= "" and cfg.ToggleKey or "none"))

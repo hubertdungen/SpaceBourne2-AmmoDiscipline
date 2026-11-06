@@ -114,45 +114,15 @@ function U.modifierDown()
     return false
 end
 
--- The HUD warning plays the game's "can't do that" alarm (GUI_Cant). Like HTR 0.4.6 and TE, with
--- U.Quiet that one sound is muted for 2 s around our own messages; the game's own warnings keep it.
--- The set agrees on its normal volume through the shared variable "SB2R_CantVolume".
-local CANT = "/Game/11Misc/LGUI/Audio/GUI_Cant.GUI_Cant"
-local CANT_NORMAL = 2.0
-local cantVolume, unmuteAt = nil, 0
-local function muteAlarm()
-    if not U.Quiet then return end
-    local snd = StaticFindObject(CANT) -- loaded with the HUD
-    if not U.valid(snd) then return end
-    if cantVolume == nil then
-        local okS, shared = pcall(function() return ModRef and ModRef:GetSharedVariable("SB2R_CantVolume") end)
-        if okS and type(shared) == "number" and shared > 0 then
-            cantVolume = shared
-        else
-            local ok, v = pcall(function() return snd.Volume end)
-            if not (ok and type(v) == "number") then return end
-            cantVolume = (v > 0) and v or CANT_NORMAL
-            pcall(function() ModRef:SetSharedVariable("SB2R_CantVolume", cantVolume) end)
-        end
-    end
-    pcall(function() snd.Volume = 0.0 end)
-    unmuteAt = os.clock() + 2.0
-    ExecuteWithDelay(2100, function()
-        ExecuteInGameThread(function()
-            if os.clock() < unmuteAt then return end
-            local s = StaticFindObject(CANT)
-            if U.valid(s) and cantVolume then pcall(function() s.Volume = cantVolume end) end
-        end)
-    end)
-end
-
--- On-screen line on foot (the HUD warning used for "No Target Nearby"; verified in HTR 0.4.1).
--- Only on foot (in a ship the pawn is the ship).
-function U.notify(pawn, text)
+-- On-screen line on foot (the HUD line used for "No Target Nearby"; verified in HTR 0.4.1), through
+-- the set's shared ad/hudmsg.lua: no HUD beep, held long enough to read, the same text at most
+-- once per 30 s. Only on foot (in a ship the pawn is the ship). force: on/off switches.
+local HM = require("ad.hudmsg")
+function U.notify(pawn, text, force)
     if U.className(pawn) ~= "Q1_Character_C" then return false end
-    U.log("msg: " .. tostring(text))
-    pcall(muteAlarm)
-    return pcall(function() pawn:TMWPerkWarning(FText(text)) end)
+    local shown = HM.show(pawn, text, nil, force)
+    U.log("msg: " .. tostring(text) .. (shown and "" or " (not shown: repeated)"))
+    return shown
 end
 
 return U

@@ -12,6 +12,9 @@ G.Shooter     = "/Game/1Data/11_AI/Q1_Shooter_AI.Q1_Shooter_AI_C"
 G.AmmoCase    = "/Game/1Data/11_AI/Miscs/AmmoThrowCase.AmmoThrowCase_C"         -- a dead enemy's ammo, flies to you
 G.AmmoCrate   = "/Game/JUPITER_SciFi_Kit/Blueprints/AmmoCrate.AmmoCrate_C"       -- +100 of each listed type
 G.DropLoot    = "/Game/1Data/Interactives/Loots/Master_Drop_Loot.Master_Drop_Loot_C" -- ammo lying around (Ammo_C)
+G.HandWeapon  = "/Game/1Data/Weapons/Hand_Weapons/Weapons/Master_Hand_Weapon.Master_Hand_Weapon_C"
+-- the empty-gun click (SoundWave): PlayOutOfAmmoSound plays it at most every 0.2 s while you fire an empty gun
+G.DryClick    = "/Game/BallisticsVFX/SFX/Guns/Weapon_Empty_SoundFx.Weapon_Empty_SoundFx"
 
 -- Hooked Blueprint functions (all post-hooks) ---------------------------------------------
 G.Fn = {
@@ -23,6 +26,7 @@ G.Fn = {
     CaseFinished  = G.AmmoCase .. ":Timeline_0__FinishedFunc", -- or when its flight ends
     CrateOpened   = G.AmmoCrate .. ":Opening__FinishedFunc",
     LootInteract  = G.DropLoot .. ":Interact",
+    DryFire       = G.HandWeapon .. ":PlayOutOfAmmoSound",
 }
 
 -- Ammo types: Bullet_Types_For_Easy_Add index (0-based) -> DataTable row, S_Ammo_Data.AmmoType, vanilla limit
@@ -71,10 +75,11 @@ G.P = {
     Sniper = "IsSniper?", Robot = "Robot?", Boss = "IsBoss",
     -- loot
     LootIsAmmo = "Ammo?",
-    -- on-foot HUD: Q1Hud -> Ship_MainWidget_C -> Curved_Widget_Test_C, whose SubGoalText_7 shows the
-    -- spare rounds for the weapon at CurrentlyEquipedIndex
-    HudMain = "Ship Main Widget", HudCurved = "Curved_Widget_Test",
-    HudSlot = "CurrentlyEquipedIndex", HudSpare = "SubGoalText_7",
+    -- on-foot HUD: Curved_Widget_Test_C (a child of Ship_MainWidget_C). Its SubGoalText_7 shows the
+    -- spare rounds; CustomEvent_13 is its handler for the game's "Reload" event: 2 s later it re-reads
+    -- the spare rounds of the weapon in hand (Curved_Widget_Test ubergraph 53466 -> 5392 -> 3991)
+    HudMain = "ShipMainWidget", HudCurved = "Curved_Widget_Test",   -- Q1Controller.ShipMainWidget
+    HudRefresh = "CustomEvent_13",
 }
 
 -- Functions we call ----------------------------------------------------------------------

@@ -4,7 +4,7 @@ You carry a few magazines, not a thousand rounds. A dead enemy gives you what wa
 
 An idea by TheCalcMan (Steam).
 
-Version 0.1.1 · UE4SS Lua mod · [url=https://www.nexusmods.com/spacebourne2/mods/12]Nexus Mods page[/url] · [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline]GitHub[/url] · works alone or with [url=https://github.com/hubertdungen/SpaceBourne2-HardcoreTacticalRealism]Hardcore Tactical Realism[/url] and the rest of the realism set.
+Version 0.1.2 · UE4SS Lua mod · [url=https://www.nexusmods.com/spacebourne2/mods/12]Nexus Mods page[/url] · [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline]GitHub[/url] · works alone or with [url=https://github.com/hubertdungen/SpaceBourne2-HardcoreTacticalRealism]Hardcore Tactical Realism[/url] and the rest of the realism set.
 
 [line]
 [size=5][b]What it does[/b][/size]
@@ -29,19 +29,18 @@ Rifle magazines hold 50 to 100 rounds, so 240 rounds is a few magazines, plus th
     - sometimes nothing usable;
     - heavy rounds from a sniper, rifle rounds from everyone else;
     - nothing from melee fighters and robots.
-[*][b]Crates and loot give less.[/b] An ammo crate gives 30 rounds of each type instead of 100. Ammo lying around gives half. Shops and rewards are never reduced (you paid), but they stop at the limit.
+[*][b]Crates and loot give less.[/b] An ammo crate gives about a quarter of your limit for each type (about 60 rifle rounds, 8 shotgun shells) instead of 100. Ammo lying around gives about 15 % of the limit (about 36 rifle rounds). Shops and rewards are never reduced (you paid), but they stop at the limit.
 [*][b]Reloading drops the magazine.[/b] The rounds left in it are lost, and the new magazine comes from your pouch. Reload when you're nearly empty, not after every burst.
 [*][b]Your pistol needs ammo too.[/b] The game gives pistols infinite ammo. Here they use pistol rounds or cells from the pouch. Ammo crates have them, and some dead enemies carry their sidearm's rounds.
 [*][b]HUD lines[/b] when it matters:
     - "Last magazine: 37 rifle rounds left";
     - "Out of spare rifle rounds";
-    - "Pouch full: max 240 rifle rounds";
-    - "+18 rifle rounds" or "No usable ammo" from a body;
-    - the totals from a crate.
+    - "Pouch full: max 240 rifle rounds".
 [/list]
 
-None of them play the game's warning alarm.
+They make no beep, stay about 5 seconds, and the same line comes back at most once in 30 seconds. A line for each pickup ("+18 rifle rounds") is off by default: the HUD counter shows it.
 [list]
+[*][b]One click on an empty gun.[/b] Pulling the trigger on an empty gun clicks once, not over and over while you hold it.
 [*][b]On by default.[/b] [b]Shift+0[/b] switches it off (the game's limits come back) and on again.
 [/list]
 
@@ -61,7 +60,7 @@ Option A (recommended): the [url=https://www.nexusmods.com/spacebourne2/mods/11]
 Option B, manual:
 
 [list=1]
-[*]Download AmmoDiscipline-0.1.1.zip from the [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/releases]releases[/url].
+[*]Download AmmoDiscipline-0.1.2.zip from the [url=https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/releases]releases[/url].
 [*]Extract it into the game folder (...\steamapps\common\SpaceBourne 2\). It adds SB2\Binaries\Win64\Mods\AmmoDiscipline\, and the enabled.txt inside turns it on.
 [*]That's it: it is on in game.
 [/list]
@@ -84,12 +83,12 @@ Edit Mods\AmmoDiscipline\scripts\config.lua with Notepad. Every line is optional
 [*]TrimToLimit: whether extra rounds on an old save are left behind.
 [*]Scavenge:
     - what bodies give: NothingChance (25 %), SpareMagazineChance (20 %), HeavyRoundsShare, RobotsCarryAmmo, SidearmChance;
-    - crates: CrateShare (30 %);
-    - loot: LootShare (50 %);
+    - crates: CrateShare (25 % of the limit);
+    - loot: LootShare (15 % of the limit);
     - Enemies, Crates and Loot switch each one off.
-[*]Reload.DropMagazine: false keeps the game's top-up reload.
+[*]Reload.DropMagazine: false keeps the game's top-up reload. Reload.OneDryClick: false gives back the game's clicking on an empty gun.
 [*]Pistols.LimitedAmmo: false gives back infinite pistol ammo.
-[*]Messages: switch off any HUD line. DroppedMagazine adds a line on every reload.
+[*]Messages: switch off any HUD line. DroppedMagazine adds a line on every reload; Pickups a line for each pickup. Quiet = false gives the lines the HUD's beep back.
 [/list]
 
 [line]

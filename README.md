@@ -8,7 +8,7 @@ Every magazine counts, and the weapon you bring matters.
 
 An idea by TheCalcMan (Steam).
 
-Version 0.1.1 · UE4SS Lua mod · [Nexus Mods page](https://www.nexusmods.com/spacebourne2/mods/12) ·
+Version 0.1.2 · UE4SS Lua mod · [Nexus Mods page](https://www.nexusmods.com/spacebourne2/mods/12) ·
 [GitHub](https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline) ·
 works alone or with [Hardcore Tactical Realism](https://github.com/hubertdungen/SpaceBourne2-HardcoreTacticalRealism)
 and the rest of the realism set.
@@ -37,8 +37,9 @@ with hundreds of rounds, the excess is left behind once, and the HUD says so.
   - sometimes nothing usable;
   - heavy rounds from a sniper, rifle rounds from everyone else;
   - nothing from melee fighters and robots.
-- **Crates and loot give less.** An ammo crate gives 30 rounds of each type instead of 100. Ammo
-  lying around gives half. Shops and rewards are never reduced (you paid), but they stop at the limit.
+- **Crates and loot give less.** An ammo crate gives about a quarter of your
+  limit for each type (about 60 rifle rounds, 8 shotgun shells) instead of 100. Ammo lying around
+  gives about 15 % of the limit (about 36 rifle rounds). Shops and rewards are never reduced (you paid), but they stop at the limit.
 - **Reloading drops the magazine.** The rounds left in it are lost, and the new magazine comes
   from your pouch. Reload when you're nearly empty, not after every burst.
 - **Your pistol needs ammo too.** The game gives pistols infinite ammo. Here they use pistol rounds or
@@ -46,11 +47,12 @@ with hundreds of rounds, the excess is left behind once, and the HUD says so.
 - **HUD lines** when it matters:
   - "Last magazine: 37 rifle rounds left";
   - "Out of spare rifle rounds";
-  - "Pouch full: max 240 rifle rounds";
-  - "+18 rifle rounds" or "No usable ammo" from a body;
-  - the totals from a crate.
+  - "Pouch full: max 240 rifle rounds".
 
-  None of them play the game's warning alarm.
+  They make no beep, stay about 5 seconds, and the same line comes back at most once in 30 seconds.
+  A line for each pickup ("+18 rifle rounds") is off by default: the HUD counter shows it.
+- **One click on an empty gun.** Pulling the trigger on an empty gun clicks once, not over and over
+  while you hold it.
 - **On by default.** **Shift+0** switches it off (the game's limits come back) and on again.
 
 ## Requirements
@@ -65,7 +67,7 @@ Option A (recommended): the [SpaceBourne 2 Realism installer](https://www.nexusm
 
 Option B, manual:
 
-1. Download `AmmoDiscipline-0.1.1.zip` from the
+1. Download `AmmoDiscipline-0.1.2.zip` from the
    [releases](https://github.com/hubertdungen/SpaceBourne2-AmmoDiscipline/releases).
 2. Extract it into the game folder (`...\steamapps\common\SpaceBourne 2\`). It adds
    `SB2\Binaries\Win64\Mods\AmmoDiscipline\`, and the `enabled.txt` inside turns it on.
@@ -89,12 +91,14 @@ Edit `Mods\AmmoDiscipline\scripts\config.lua` with Notepad. Every line is option
 - `Scavenge`:
   - what bodies give: `NothingChance` (25 %), `SpareMagazineChance` (20 %), `HeavyRoundsShare`,
     `RobotsCarryAmmo`, `SidearmChance`;
-  - crates: `CrateShare` (30 %);
-  - loot: `LootShare` (50 %);
+  - crates: `CrateShare` (25 % of the limit);
+  - loot: `LootShare` (15 % of the limit);
   - `Enemies`, `Crates` and `Loot` switch each one off.
-- `Reload.DropMagazine`: `false` keeps the game's top-up reload.
+- `Reload.DropMagazine`: `false` keeps the game's top-up reload. `Reload.OneDryClick`: `false` gives back the
+  game's clicking on an empty gun.
 - `Pistols.LimitedAmmo`: `false` gives back infinite pistol ammo.
-- `Messages`: switch off any HUD line. `DroppedMagazine` adds a line on every reload.
+- `Messages`: switch off any HUD line. `DroppedMagazine` adds a line on every reload; `Pickups` a line
+  for each pickup. `Quiet = false` gives the lines the HUD's beep back.
 
 ## Works with the realism set
 
@@ -118,8 +122,13 @@ Tested in game on 2026-10-31, with HTR 0.4.8, Silent Ops, Split Controls, Gear W
 - switching it off and on with a real key press;
 - frame times with and without the mod.
 
-0.1.1 (the HUD number after a pickup, no lost rounds just after a load) was checked against the
-game's Blueprints; it has not been run in game yet.
+0.1.1 and 0.1.2 were tested in game on 2026-11-06 with HTR 0.4.11 and the rest of the set:
+- the HUD number equal to the pouch after ammo lying around, a crate and enemy drops;
+- a crate: rifle +50, sniper +8, shotgun +7 (a quarter of each limit, give or take);
+- ammo lying around (100 rifle rounds): +40;
+- a dead enemy's shotgun shells taken back, without a "Pouch full" line;
+- HUD lines without the beep, still on screen after 3 s, not repeated within 30 s;
+- an empty rifle with the trigger held: one click.
 <!-- /nexus:skip -->
 
 Known limits:
