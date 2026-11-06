@@ -81,12 +81,14 @@ U.warn(string.format("=== Ammo Discipline %s loaded: %s, key %s ===", VERSION, M
 
 -- Poll --------------------------------------------------------------------------------------------
 local lastStatus, profileAt = "", os.clock() + 30
--- Once a second on the game thread, pumped by the ALS character tick (gametick.lua, 0.1.3). Until
+-- Once a second on the game thread, pumped by the HUD draw, with the ALS character tick as a
+-- fallback (gametick.lua, 0.1.3). Until
 -- 0.1.2 this was LoopAsync + ExecuteInGameThread: called from UE4SS's async thread,
 -- ExecuteInGameThread writes a map all mods share without a lock, and two mods doing it at once
 -- crashed the game (UE4SS.dll+0x87c104). After each load (ClientRestart) the pump hook is set again.
 local GT = require("ad.gametick")
 GT.log = function(msg) U.warn(msg) end
+GT.drive(GT.HUD_TICK, "hud")
 GT.drive(GT.FOOT_TICK, "foot")
 GT.boot()
 GT.every(1.0, function(now)
