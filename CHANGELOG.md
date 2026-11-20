@@ -2,12 +2,16 @@
 
 ## 0.1.4 (2026-11-20)
 
-- **Fix: "Pouch full: max 240 rifle rounds" with a pouch at 187 after kills.** A dead enemy's ammo
-  case takes back the game's own 40-100 rounds and gives what that enemy carried. That only worked if
-  the case's hook ran within 4 ms of the game's pickup; when it ran later (a heavy frame, a slow
-  disk write, other mods' hooks in between) the game's full amount stayed, the pouch jumped to the
-  limit and "Pouch full" showed. The case now claims the pickup for up to a quarter of a second when
-  one of its flights was running just before, and the line waits until no claim is possible.
+- **"Pouch full: max 240" after kills with a pouch at 187 (report from TheCalcMan).** A dead enemy's
+  ammo case takes back the game's own 40-100 rounds and gives what that enemy carried. That only
+  worked if the case's hook ran within 4 ms of the game's pickup; if it ran later (a heavy frame, a
+  slow disk write, other mods' hooks in between), the game's full amount stayed, the pouch jumped to
+  the limit and "Pouch full" showed. This could not be reproduced in testing (every pickup was
+  claimed within 3 ms), so 0.1.4 hardens it: the case now claims the pickup for up to a quarter of a
+  second when one of its flights was running just before, and the line waits until no claim is
+  possible.
+- Rifle cells (laser rifles) have their own pouch with a 240 limit, so "Pouch full: max 240 rifle
+  cells" is correct even when your rifle rounds are lower. Each line names its pouch.
 - "Pouch full" for an enemy's drop now shows only when nothing at all fitted into the pouch.
 - The ammo hooks look again as soon as any weapon fires (at most every 5 s), so they cannot stay asleep after
   a long quiet stretch or a trip to space and back.
