@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.4 (2026-11-20)
+
+- **Fix: "Pouch full: max 240 rifle rounds" with a pouch at 187 after kills.** A dead enemy's ammo
+  case takes back the game's own 40-100 rounds and gives what that enemy carried. That only worked if
+  the case's hook ran within 4 ms of the game's pickup; when it ran later (a heavy frame, a slow
+  disk write, other mods' hooks in between) the game's full amount stayed, the pouch jumped to the
+  limit and "Pouch full" showed. The case now claims the pickup for up to a quarter of a second when
+  one of its flights was running just before, and the line waits until no claim is possible.
+- "Pouch full" for an enemy's drop now shows only when nothing at all fitted into the pouch.
+- The ammo hooks look again as soon as you fire (at most every 5 s), so they cannot stay asleep after
+  a long quiet stretch or a trip to space and back.
+- With `Debug.Log` on, the log shows for every pickup whether it was claimed, how long after the
+  pickup the case hook ran, and whether the case hooks were registered.
+
 ## 0.1.3 (2026-11-06)
 
 - **Fix: a "Fatal Error!" crash that could come at any moment.** The mod's timed work (the pouch

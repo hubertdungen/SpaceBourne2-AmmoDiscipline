@@ -26,6 +26,13 @@ local M = {
 }
 local cfg
 local SAME_CALL = 0.004 -- s: a source's post-hook runs microseconds after its own Add Ammo
+-- 0.1.4: an ammo case claims an add up to this long after it (0.1.3: 4 ms: a heavy frame, a slow log write
+-- or other mods' hooks between the add and the case's post-hook left the add unclaimed: the dead enemy's
+-- full 40-100 rounds stayed and "Pouch full" showed with a pouch at 187). The source's own post-hook runs
+-- right after its own add, so a wider window only matters when that hook is late.
+local CASE_CALL = 0.06
+local CASE_FLYING = 0.25 -- s: ... when a case was in flight just before the add
+local MSG_DELAY = 0.12 -- s: "Pouch full" for an unclaimed add waits longer than any claim window
 
 function M.init(c)
     cfg = c
@@ -283,8 +290,9 @@ function M.onAddAmmo(selfP, rowP, amountP, byNameP, nameP)
     for i = #M.recent, 1, -1 do
         if now - M.recent[i].time > 1 then table.remove(M.recent, i) end
     end
-    -- made inside an ammo case's own call (its pre-hook ran): the case claims it whatever the timing
-    local rec = { t = t, amount = amount, before = before, final = final, time = now, case = M.inCase ~= nil and now - M.inCase < 0.05 }
+    -- a case in flight just now (its hook ran lately): this add is most likely its own
+    local rec = { t = t, amount = amount, before = before, final = final, time = now,
+        flying = M.caseSeen ~= nil and now - M.caseSeen < 0.5 }
     M.recent[#M.recent + 1] = rec
     -- unclaimed after the call: a source we do not know; look for crates and loot again
     GT.after(0.06, function()
@@ -307,8 +315,8 @@ function M.onAddAmmo(selfP, rowP, amountP, byNameP, nameP)
     rec.time = os.clock() -- after the log: a slow log write must not hide this add from its source
     -- "Pouch full" only if no source took the add back (a dead enemy's case first takes it all back,
     -- then gives its own rounds; test 10 showed the line anyway)
-    if cfg.Messages.PouchFull and before + amount > final and not rec.case then
-        GT.after(0.04, function()
+    if cfg.Messages.PouchFull and before + amount > final then
+        GT.after(rec.flying and CASE_FLYING + 0.05 or MSG_DELAY, function()
             if not rec.claimed then M.say(string.format("Pouch full: max %d %s", c, label(t))) end
         end)
     end
@@ -317,11 +325,11 @@ end
 
 -- Sources ---------------------------------------------------------------------------------------
 -- The pickups recorded during the current call (newest first), claimed and taken back.
-local function takeBack(gb, window, caseCall)
+local function takeBack(gb, window)
     local now, list = os.clock(), {}
     for i = #M.recent, 1, -1 do
         local r = M.recent[i]
-        if not r.claimed and ((caseCall and r.case) or now - r.time <= (window or SAME_CALL)) then
+        if not r.claimed and now - r.time <= (r.flying and window and window > SAME_CALL and math.max(window, CASE_FLYING) or window or SAME_CALL) then
             r.claimed = true
             list[#list + 1] = r
         end
@@ -409,19 +417,9 @@ local function caseRounds(info, gameT, gameAmount)
 end
 
 -- AmmoThrowCase: Timeline_0__UpdateFunc / __FinishedFunc (the add happens inside one of them)
--- Pre-hook of the case's timeline functions: the Add Ammo call that follows inside this call is the case's.
-function M.onCasePre()
-    if M.on and cfg.Scavenge.Enemies then M.inCase = os.clock() end
-end
-
 function M.onCase(selfP)
-    local ok, err = pcall(M.onCaseBody, selfP)
-    M.inCase = nil
-    if not ok then error(err, 0) end
-end
-
-function M.onCaseBody(selfP)
     if not (M.on and cfg.Scavenge.Enemies) then return end
+    M.caseSeen = os.clock() -- a case is flying (this hook runs every frame of its flight)
     if #M.recent == 0 then return end -- every frame of the flight: nothing to do
     local gb = gameBuilder()
     if not gb then return end
@@ -433,7 +431,7 @@ function M.onCaseBody(selfP)
                 (os.clock() - r.time) * 1000, SAME_CALL * 1000))
         end
     end
-    local list = takeBack(gb, SAME_CALL, true)
+    local list = takeBack(gb, CASE_CALL)
     if #list == 0 then return end
     local a = U.addr(U.param(selfP))
     local c = a and M.cases[a]
@@ -443,7 +441,7 @@ function M.onCaseBody(selfP)
     local gained, full = 0, false
     if t and n > 0 then gained, full = grant(gb, t, n) end
     U.log(string.format("enemy case: game gave %d %s; now %s %d, you got %d (%s%s)", r.amount, r.t.row, t and t.row or "-", n,
-        gained, c and c.info and "enemy known" or "enemy unknown", r.case and ", claimed by its own call" or ", claimed by timing"))
+        gained, c and c.info and "enemy known" or "enemy unknown", string.format("claimed %.1f ms after the add", (os.clock() - r.time) * 1000)))
     -- "Pouch full" only when the limit really stopped the pickup (nothing fitted), not for a pouch that took part
     if t and n > 0 and gained == 0 then
         if cfg.Messages.PouchFull then M.say(string.format("Pouch full: max %d %s", cap(t), label(t))) end

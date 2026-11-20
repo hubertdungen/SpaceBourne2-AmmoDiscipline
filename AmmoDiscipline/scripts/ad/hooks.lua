@@ -24,21 +24,9 @@ local CHECK_LOADED = 5
 local RETRY_ALWAYS = 16
 local RETRY_WAKE = 32
 
-function H.add(path, fn, tag, mode, pre)
+function H.add(path, fn, tag, mode)
     local h = { path = path, fn = fn, tag = tag or path, errors = 0, disabled = false, on = false, slow = 0, slowAt = -1e9,
         calls = 0, total = 0 }
-    if pre then
-        -- a pre-hook runs before the Blueprint body (0.1.4: marks the adds a call makes itself)
-        h.pre = function(...)
-            if h.disabled then return end
-            local ok, err = pcall(pre, ...)
-            if not ok then
-                h.errors = h.errors + 1
-                if h.errors <= 3 then U.warn("error in " .. h.tag .. " (pre): " .. tostring(err)) end
-                if h.errors >= MAX_ERRORS then h.disabled = true; U.warn("hook " .. h.tag .. " disabled after repeated errors") end
-            end
-        end
-    end
     h.cb = function(...)
         if h.disabled then return end
         local t0 = os.clock()
@@ -73,8 +61,7 @@ function H.add(path, fn, tag, mode, pre)
 end
 
 local function register(h)
-    local ok, err
-    if h.pre then ok, err = pcall(RegisterHook, h.path, h.pre, h.cb) else ok, err = pcall(RegisterHook, h.path, h.cb) end
+    local ok, err = pcall(RegisterHook, h.path, h.cb)
     h.on = ok
     if ok then U.log("hooked " .. h.tag) else U.warn("could not hook " .. h.path .. ": " .. tostring(err)) end
 end

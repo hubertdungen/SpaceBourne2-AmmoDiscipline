@@ -69,8 +69,8 @@ H.add(G.Fn.Arrival, M.onArrival, "arrival")
 if cfg.Scavenge.Enemies then
     H.add(G.Fn.ThrowAmmo, M.onThrowAmmo, "enemy drops ammo", "wake")
     H.add(G.Fn.CaseBegin, M.onCaseBegin, "ammo case spawned", "wake")
-    H.add(G.Fn.CaseUpdate, M.onCase, "ammo case flight", "wake", M.onCasePre)
-    H.add(G.Fn.CaseFinished, M.onCase, "ammo case landed", "wake", M.onCasePre)
+    H.add(G.Fn.CaseUpdate, M.onCase, "ammo case flight", "wake")
+    H.add(G.Fn.CaseFinished, M.onCase, "ammo case landed", "wake")
     H.add(G.Fn.PlayerShot, M.onPlayerShot, "your shot (wakes the hooks)")
     H.add(G.Fn.PlayerBeam, M.onPlayerShot, "your beam (wakes the hooks)")
 end
