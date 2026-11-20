@@ -1,2 +1,6 @@
 # files the mod writes in the game folder
 ad.log
+
+# local tool folders (never part of the mod)
+.claude/
+**/.claude/

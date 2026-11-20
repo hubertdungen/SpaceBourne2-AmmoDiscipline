@@ -9,7 +9,7 @@
   limit and "Pouch full" showed. The case now claims the pickup for up to a quarter of a second when
   one of its flights was running just before, and the line waits until no claim is possible.
 - "Pouch full" for an enemy's drop now shows only when nothing at all fitted into the pouch.
-- The ammo hooks look again as soon as you fire (at most every 5 s), so they cannot stay asleep after
+- The ammo hooks look again as soon as any weapon fires (at most every 5 s), so they cannot stay asleep after
   a long quiet stretch or a trip to space and back.
 - With `Debug.Log` on, the log shows for every pickup whether it was claimed, how long after the
   pickup the case hook ran, and whether the case hooks were registered.

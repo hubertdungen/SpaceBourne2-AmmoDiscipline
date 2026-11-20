@@ -71,8 +71,8 @@ if cfg.Scavenge.Enemies then
     H.add(G.Fn.CaseBegin, M.onCaseBegin, "ammo case spawned", "wake")
     H.add(G.Fn.CaseUpdate, M.onCase, "ammo case flight", "wake")
     H.add(G.Fn.CaseFinished, M.onCase, "ammo case landed", "wake")
-    H.add(G.Fn.PlayerShot, M.onPlayerShot, "your shot (wakes the hooks)")
-    H.add(G.Fn.PlayerBeam, M.onPlayerShot, "your beam (wakes the hooks)")
+    H.add(G.Fn.GunFire, M.onGunFire, "gunfire (wakes the hooks)")
+    H.add(G.Fn.BeamFire, M.onGunFire, "beam fire (wakes the hooks)")
 end
 if cfg.Scavenge.Crates then H.add(G.Fn.CrateOpened, M.onCrateOpened, "ammo crate", "wake") end
 if cfg.Scavenge.Loot then H.add(G.Fn.LootInteract, M.onLoot, "ammo loot", "wake") end

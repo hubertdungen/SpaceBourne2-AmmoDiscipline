@@ -613,15 +613,15 @@ local function dryCheck()
     dryMuted = false
 end
 
--- Your shots: a fight is starting, so the enemy / ammo case hooks must be looking (they go idle after a
--- minute without the class, and when it is lost: a trip to space and back). At most every 5 s.
+-- Any hand weapon firing (yours, an NPC's, your squad's: every Master_Hand_Weapon): a fight is on, so the
+-- enemy / ammo case hooks must be looking (they go idle after a minute without the class, and when it is
+-- lost: a trip to space and back). Trivial until the 5 s throttle has passed: one clock read, no allocation.
 local lastWake = -1e9
-function M.onPlayerShot()
-    if not M.on then return end
+function M.onGunFire()
     local now = os.clock()
     if now - lastWake < 5 then return end
     lastWake = now
-    if M.wake then M.wake() end
+    if M.on and M.wake then M.wake() end
 end
 
 function M.onDryFire()
