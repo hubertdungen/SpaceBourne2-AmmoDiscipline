@@ -27,6 +27,8 @@ G.Fn = {
     CrateOpened   = G.AmmoCrate .. ":Opening__FinishedFunc",
     LootInteract  = G.DropLoot .. ":Interact",
     DryFire       = G.HandWeapon .. ":PlayOutOfAmmoSound",
+    PlayerShot    = G.HandWeapon .. ":SpawnProjectile",    -- your projectile guns
+    PlayerBeam    = G.HandWeapon .. ":ActiveBeam1",        -- your beam weapons
 }
 
 -- Ammo types: Bullet_Types_For_Easy_Add index (0-based) -> DataTable row, S_Ammo_Data.AmmoType, vanilla limit

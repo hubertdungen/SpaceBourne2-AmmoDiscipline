@@ -11,7 +11,7 @@
   Design notes and the test log: DESIGN.md in the repository.
 ]]
 
-local VERSION = "0.1.3"
+local VERSION = "0.1.4"
 
 local U = require("ad.util")
 
@@ -69,8 +69,10 @@ H.add(G.Fn.Arrival, M.onArrival, "arrival")
 if cfg.Scavenge.Enemies then
     H.add(G.Fn.ThrowAmmo, M.onThrowAmmo, "enemy drops ammo", "wake")
     H.add(G.Fn.CaseBegin, M.onCaseBegin, "ammo case spawned", "wake")
-    H.add(G.Fn.CaseUpdate, M.onCase, "ammo case flight", "wake")
-    H.add(G.Fn.CaseFinished, M.onCase, "ammo case landed", "wake")
+    H.add(G.Fn.CaseUpdate, M.onCase, "ammo case flight", "wake", M.onCasePre)
+    H.add(G.Fn.CaseFinished, M.onCase, "ammo case landed", "wake", M.onCasePre)
+    H.add(G.Fn.PlayerShot, M.onPlayerShot, "your shot (wakes the hooks)")
+    H.add(G.Fn.PlayerBeam, M.onPlayerShot, "your beam (wakes the hooks)")
 end
 if cfg.Scavenge.Crates then H.add(G.Fn.CrateOpened, M.onCrateOpened, "ammo crate", "wake") end
 if cfg.Scavenge.Loot then H.add(G.Fn.LootInteract, M.onLoot, "ammo loot", "wake") end
