@@ -616,11 +616,13 @@ end
 -- Any hand weapon firing (yours, an NPC's, your squad's: every Master_Hand_Weapon): a fight is on, so the
 -- enemy / ammo case hooks must be looking (they go idle after a minute without the class, and when it is
 -- lost: a trip to space and back). Trivial until the 5 s throttle has passed: one clock read, no allocation.
-local lastWake = -1e9
+local lastWake, fires = -1e9, 0
 function M.onGunFire()
+    fires = fires + 1
     local now = os.clock()
     if now - lastWake < 5 then return end
-    lastWake = now
+    U.log(string.format("gunfire: %d shots since the last wake (%.0f s ago); the hooks look again", fires, now - lastWake))
+    lastWake, fires = now, 0
     if M.on and M.wake then M.wake() end
 end
 
