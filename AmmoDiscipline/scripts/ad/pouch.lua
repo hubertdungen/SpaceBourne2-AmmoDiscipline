@@ -441,7 +441,7 @@ function M.onCase(selfP)
     local gained, full = 0, false
     if t and n > 0 then gained, full = grant(gb, t, n) end
     U.log(string.format("enemy case: game gave %d %s; now %s %d, you got %d (%s%s)", r.amount, r.t.row, t and t.row or "-", n,
-        gained, c and c.info and "enemy known" or "enemy unknown", string.format("claimed %.1f ms after the add", (os.clock() - r.time) * 1000)))
+        gained, c and c.info and "enemy known" or "enemy unknown", string.format(", claimed %.1f ms after the add", (os.clock() - r.time) * 1000)))
     -- "Pouch full" only when the limit really stopped the pickup (nothing fitted), not for a pouch that took part
     if t and n > 0 and gained == 0 then
         if cfg.Messages.PouchFull then M.say(string.format("Pouch full: max %d %s", cap(t), label(t))) end
