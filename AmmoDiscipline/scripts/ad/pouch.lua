@@ -11,6 +11,7 @@
 
 local U = require("ad.util")
 local G = require("ad.gamedefs")
+local Hk = require("ad.hooks")
 local GT = require("ad.gametick") -- timed work on the game thread (0.1.3: no ExecuteWithDelay)
 local P = G.P
 
@@ -101,6 +102,7 @@ end
 
 function M.say(text, force)
     if not text then return end
+    U.log("say: " .. tostring(text)) -- (debug)
     pending = { text = text, force = force }
     if not flushScheduled then
         flushScheduled = true
@@ -287,12 +289,20 @@ function M.onAddAmmo(selfP, rowP, amountP, byNameP, nameP)
     GT.after(0.06, function()
         for _, r in ipairs(M.recent) do
             if not r.claimed and os.clock() - r.time < 1 then
+                U.log(string.format("add #%s still unclaimed after %.0f ms (case hooks %s); waking the hooks", tostring(r.seq),
+                    (os.clock() - r.time) * 1000, Hk.loaded(G.Fn.CaseUpdate) and "registered" or "NOT registered"))
                 if M.wake then M.wake() end
                 return
             end
         end
     end)
-    U.log(string.format("+%d %s: %d -> %d", amount, t.row, before, final))
+    -- (debug) what the claim depends on: are the case hooks registered, how old is the last case
+    local lc = M.lastCase
+    rec.seq = (M.seq or 0) + 1
+    M.seq = rec.seq
+    U.log(string.format("+%d %s: %d -> %d (add #%d; case hooks %s, last case %s)", amount, t.row, before, final, rec.seq,
+        Hk.loaded(G.Fn.CaseUpdate) and "registered" or "NOT registered",
+        lc and string.format("%.2f s ago", os.clock() - lc.t) or "none"))
     rec.time = os.clock() -- after the log: a slow log write must not hide this add from its source
     -- "Pouch full" only if no source took the add back (a dead enemy's case first takes it all back,
     -- then gives its own rounds; test 10 showed the line anyway)
@@ -403,6 +413,14 @@ function M.onCase(selfP)
     if #M.recent == 0 then return end -- every frame of the flight: nothing to do
     local gb = gameBuilder()
     if not gb then return end
+    -- (debug) the gap between the add and this hook, for each add still unclaimed
+    for _, r in ipairs(M.recent) do
+        if not r.claimed and not r.gapLogged then
+            r.gapLogged = true
+            U.log(string.format("case hook sees add #%s %.1f ms after it (window %.0f ms)", tostring(r.seq),
+                (os.clock() - r.time) * 1000, SAME_CALL * 1000))
+        end
+    end
     local list = takeBack(gb)
     if #list == 0 then return end
     local a = U.addr(U.param(selfP))
